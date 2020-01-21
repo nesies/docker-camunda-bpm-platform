@@ -64,7 +64,9 @@ RUN apk add --no-cache \
     && chmod +x /usr/local/bin/wait-for-it.sh
 
 RUN addgroup -g 1000 -S camunda && \
-    adduser -u 1000 -S camunda -G camunda -h /camunda -s /bin/bash -D camunda
+    adduser -u 1000 -S camunda -G camunda -h /camunda -s /bin/bash -D camunda && \
+    adduser camunda root
+    
 WORKDIR /camunda
 USER camunda
 
@@ -72,3 +74,6 @@ ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["./camunda.sh"]
 
 COPY --chown=camunda:camunda --from=builder /camunda .
+# compat openshift gid=0
+RUN chgrp -R 0 /camunda && \
+    chmod -R g=u /camunda
