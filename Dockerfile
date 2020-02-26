@@ -72,3 +72,15 @@ ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["./camunda.sh"]
 
 COPY --chown=camunda:camunda --from=builder /camunda .
+
+RUN mkdir /camunda/data
+RUN mkdir /camunda/scripts
+
+ADD --chown=camunda:camunda https://github.com/DigitalState/camunda-administrative-user-plugin/releases/download/v0.1/camunda.administrativeuser.plugin-0.1.0-SNAPSHOT.jar \
+    /camunda/lib/
+COPY --chown=camunda:camunda camunda-administrativeuser.xml \
+     camunda-administrativeuser.xsl \
+     /camunda/data/
+COPY --chown=camunda:camunda camunda-administrativeuser.sh \
+     /camunda/scripts/
+RUN chmod +x /camunda/scripts/camunda-administrativeuser.sh
