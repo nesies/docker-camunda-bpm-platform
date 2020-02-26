@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<plugin xmlns="http://www.camunda.org/schema/1.0/BpmPlatform">
+  <class>io.digitalstate.camunda.plugins.AdministrativeUserPlugin</class>
+  <properties>
+    <property name="administratorUserName">1</property>
+    <property name="administratorPassword">p1</property>
+    <property name="administratorFirstName">f</property>
+    <property name="administratorLastName">l</property>
+    <property name="administratorEmail">e</property>
+  </properties>
+</plugin>
