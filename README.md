@@ -281,6 +281,18 @@ docker build -t camunda-bpm-platform \
 ```
 
 ## Use Cases
+### set default admin user
+You can choose to set a admin user
+
+```
+docker run -d --name camunda -p 8080:8080 \
+           -e ADMIN_USERNAME=admin \
+           -e ADMIN_PASSWORD=adminpassword \
+           -e ADMIN_EMAIL=admin@email \
+           -e ADMIN_FIRSTNAME=first1 \
+           -e ADMIN_LASTNAME=last1 \
+           camunda/camunda-bpm-platform:latest
+```
 
 ### Change Configuration Files
 
