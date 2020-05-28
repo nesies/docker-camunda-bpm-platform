@@ -15,6 +15,13 @@ ARG MAVEN_PROXY_PASSWORD
 
 ARG JMX_PROMETHEUS_VERSION=0.12.0
 
+ARG http_proxy
+ARG https_proxy
+ARG MAVEN_PROXY_HOST
+ARG MAVEN_PROXY_PORT
+ARG MAVEN_PROXY_USER
+ARG MAVEN_PROXY_PASSWORD
+
 RUN apk add --no-cache \
         bash \
         ca-certificates \
@@ -71,7 +78,8 @@ RUN apk add --no-cache \
     && chmod +x /usr/local/bin/wait-for-it.sh
 
 RUN addgroup -g 1000 -S camunda && \
-    adduser -u 1000 -S camunda -G camunda -h /camunda -s /bin/bash -D camunda
+    adduser -u 1000 -S camunda -G camunda -h /camunda -s /bin/bash -D camunda && \
+    adduser camunda root
 WORKDIR /camunda
 USER camunda
 
@@ -79,3 +87,26 @@ ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["./camunda.sh"]
 
 COPY --chown=camunda:camunda --from=builder /camunda .
+
+RUN mkdir /camunda/data
+RUN mkdir /camunda/scripts
+
+COPY --chown=camunda:camunda camunda-engine-rest-enable-auth.xml \
+     camunda-engine-rest-enable-auth.xsl \
+     /camunda/data/
+COPY --chown=camunda:camunda camunda-engine-rest-enable-auth.sh \
+     /camunda/scripts/
+RUN chmod +x /camunda/scripts/camunda-engine-rest-enable-auth.sh
+
+ADD --chown=camunda:camunda https://github.com/DigitalState/camunda-administrative-user-plugin/releases/download/v0.1/camunda.administrativeuser.plugin-0.1.0-SNAPSHOT.jar \
+    /camunda/lib/
+COPY --chown=camunda:camunda camunda-administrativeuser.xml \
+     camunda-administrativeuser.xsl \
+     /camunda/data/
+COPY --chown=camunda:camunda camunda-administrativeuser.sh \
+     /camunda/scripts/
+RUN chmod +x /camunda/scripts/camunda-administrativeuser.sh
+
+# compat openshift gid=0
+RUN chgrp -R 0 /camunda && \
+    chmod -R g=u /camunda
