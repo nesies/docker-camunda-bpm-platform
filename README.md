@@ -316,6 +316,18 @@ docker build -t camunda-bpm-platform \
 ```
 
 ## Use Cases
+### set default admin user
+You can choose to set a admin user
+
+```
+docker run -d --name camunda -p 8080:8080 \
+           -e ADMIN_USERNAME=admin \
+           -e ADMIN_PASSWORD=adminpassword \
+           -e ADMIN_EMAIL=admin@email \
+           -e ADMIN_FIRSTNAME=first1 \
+           -e ADMIN_LASTNAME=last1 \
+           camunda/camunda-bpm-platform:latest
+```
 
 ### Change Configuration Files
 
@@ -343,6 +355,14 @@ docker run -d --name camunda -p 8080:8080 \
 This also allows you to modify the app outside of the container and it will
 be redeployed inside the platform.
 
+
+### Enforce AUTH in API REST
+
+```
+docker run -d --name camunda -p 8080:8080 \
+           --env ENGINE_REST_AUTH_ENABLE=1 \
+           camunda/camunda-bpm-platform:latest
+```
 
 ### Clean Distro Without Webapps and Examples
 
