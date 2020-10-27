@@ -61,6 +61,15 @@ if [ $? -ne 0 ] ; then
     exit 1
 fi
 
+/camunda/scripts/camunda-administrativeuser.sh \
+    /camunda/conf/bpm-platform.xml \
+    /camunda/data/camunda-administrativeuser.xsl \
+    /camunda/data/camunda-administrativeuser.xml
+if [ $? -ne 0 ] ; then
+    echo "ERROR camunda.administrativeuser.sh"
+    exit 1
+fi
+
 CMD="${CATALINA_HOME}/bin/catalina.sh"
 if [ "${DEBUG}" = "true" ]; then
   echo "Enabling debug mode, JPDA accesible under port 8000"
