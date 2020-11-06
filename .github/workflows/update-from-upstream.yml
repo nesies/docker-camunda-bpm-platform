@@ -10,6 +10,44 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:    
+  refresh-7_12:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+        with:          
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - run: |
+          git remote add camunda https://github.com/camunda/docker-camunda-bpm-platform.git
+      - run: git fetch camunda
+      - run: git checkout 7.12-apiauth-adminuser-group0
+      - run: git config --global user.email "none"
+      - run: git config --global user.name "github-workflow"
+      - run: git merge camunda/7.12
+      - run: git push
+                  
+  refresh-7_13:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+        with:          
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - run: |
+          git remote add camunda https://github.com/camunda/docker-camunda-bpm-platform.git
+      - run: git fetch camunda
+      - run: git checkout 7.13-apiauth-adminuser-group0
+      - run: git config --global user.email "none"
+      - run: git config --global user.name "github-workflow"
+      - run: git merge camunda/7.13
+      - run: git push
+                  
   refresh-7_14:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -28,7 +66,6 @@ jobs:
       - run: git config --global user.name "github-workflow"
       - run: git merge camunda/7.14
       - run: git push
-
                   
   refresh-next:
     # The type of runner that the job will run on
