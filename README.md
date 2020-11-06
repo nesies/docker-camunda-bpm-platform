@@ -1,7 +1,7 @@
 # Camunda BPM Platform Docker Images
 [![Build Status](https://travis-ci.com/camunda/docker-camunda-bpm-platform.svg?branch=next)](https://travis-ci.com/camunda/docker-camunda-bpm-platform)
 
-This Camunda BPM community project provides docker images of the latest Camunda
+This Camunda project provides docker images of the latest Camunda
 BPM platform releases. The images can be used to demonstrate and test the
 Camunda BPM platform or can be extended with own process applications. It is
 planned to provide images on the official [docker registry][] for every upcoming
@@ -45,7 +45,7 @@ either be `tomcat`, `wildfly` or `run`. If no `${DISTRO}` is specified the
 `tomcat` distribution is used.
 
 - `latest`, `${DISTRO}-latest`: Alywas the latest minor release of Camunda BPM
-  platform. Without
+  platform.
 - `SNAPSHOT`, `${VERSION}-SNAPSHOT`, `${DISTRO}-SNAPSHOT`,
   `${DISTRO}-${VERSION}-SNAPSHOT`: The latest SNAPSHOT version of Camunda BPM
   platform, which is not released yet.
@@ -53,6 +53,40 @@ either be `tomcat`, `wildfly` or `run`. If no `${DISTRO}` is specified the
   platform.
 
 For all available tags see the [docker hub tags][].
+
+## Configuration of the `run` distribution
+
+Because `run` is a Spring Boot distribution, it can be configured through the respective environment variables. For example:
+- `SPRING_DATASOURCE_DRIVER_CLASS_NAME` the database driver class name, supported are h2 (default), mysql, and postgresql:
+  - h2: `DB_DRIVER=org.h2.Driver`
+  - mysql: `DB_DRIVER=com.mysql.jdbc.Driver`
+  - postgresql: `DB_DRIVER=org.postgresql.Driver`
+- `SPRING_DATASOURCE_URL` the database jdbc url
+- `SPRING_DATASOURCE_USERNAME` the database username
+- `SPRING_DATASOURCE_PASSWORD` the database password
+
+When not set or otherwise specified, the integrated H2 database is used.
+
+Any other `SPRING_*` variables can be used to further configure the app. 
+Alternatively, a `default.yml` file can be mounted to `/camunda/configuration/default.yml`.
+More information on configuring Spring Boot applications can be found in the [Spring Boot Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config).
+
+The environment variables `DB_DRIVER`, `DB_USERNAME`, `DB_PASSWORD`, `DB_URL`, `DB_PASSWORD_FILE` are supported
+for convenience and compatibility and are internally mapped to `SPRING_DATASOURCE_*` variables when provided.
+
+The `JMX_PROMETHEUS` configuration is not supported, and while `DEBUG` can be used to enable debug output, it doesn't
+start a debug socket.
+
+`run` supports different startup options to choose whether or not to enable the WebApps or the REST API.
+
+Passing startup parameters to enable either one or the other can be done as in the following example:
+
+```bash
+docker run camunda/camunda-bpm-platform:run ./camunda.sh --webapps
+docker run camunda/camunda-bpm-platform:run ./camunda.sh --rest
+```
+
+Additionally, a `--production` parameter is supported to switch the configuration to `/camunda/configuration/production.yml`.
 
 ## Java Versions
 
@@ -78,12 +112,13 @@ JAVA_OPTS="-Xmx768m -XX:MaxMetaspaceSize=256m"
 ### Use docker memory limits
 
 Instead of specifying the Java memory settings it is also possible to instruct
-the JVM to respect the docker memory settings. As the image uses Java 8 it has
-to be enabled using the `JAVA_OPTS` environment variable. Using the following
-settings the JVM will respect docker memory limits specified during startup.
+the JVM to respect the docker memory settings. As the image uses Java 11 it does
+not have to be enabled explicitly using the `JAVA_OPTS` environment variable. 
+If you want to set the memory limits manually you can restore the pre-Java-11-behavior
+by setting the following environment variable.
 
 ```
-JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+JAVA_OPTS="-XX:-UseContainerSupport"
 ```
 
 ## Database environment variables
@@ -94,19 +129,17 @@ variables:
 - `DB_CONN_MAXACTIVE` the maximum number of active connections (default: `20`)
   - for `tomcat`, this is internally mapped to the `maxTotal` configuration property.
 - `DB_CONN_MAXIDLE` the maximum number of idle connections (default: `20`)
-  - ignored when app server = `wildfly`
+  - ignored when app server = `wildfly` or `run`
 - `DB_CONN_MINIDLE` the minimum number of idle connections (default: `5`)
-- `DB_DRIVER` the database driver class name, supported are h2, mysql, postgresql and oracle:
+- `DB_DRIVER` the database driver class name, supported are h2, mysql, and postgresql:
   - h2: `DB_DRIVER=org.h2.Driver`
   - mysql: `DB_DRIVER=com.mysql.jdbc.Driver`
   - postgresql: `DB_DRIVER=org.postgresql.Driver`
-  - oracle: `DB_DRIVER=oracle.jdbc.OracleDriver`
 - `DB_URL` the database jdbc url
 - `DB_USERNAME` the database username
 - `DB_PASSWORD` the database password
 - `DB_VALIDATE_ON_BORROW` validate database connections before they are used (default: `false`)
 - `DB_VALIDATION_QUERY` the query to execute to validate database connections (default: `"SELECT 1"`)
-  - oracle: `DB_VALIDATION_QUERY="select 1 from dual"`
 - `DB_PASSWORD_FILE` this supports [Docker Secrets](https://docs.docker.com/engine/swarm/secrets/). 
   Put here the path of the secret, e.g. `/run/secrets/camunda_db_password`. 
   Make sure that `DB_PASSWORD` is not set when using this variable!
@@ -200,6 +233,7 @@ structure depends on the application server.
 To enable JPDA inside the container you can set the environment variable
 `DEBUG=true` on startup of the container. This will allow you to connect to the
 container on port `8000` to debug your application.
+This is only supported for `wildfly` and `tomcat` distributions.
 
 ## Prometheus JMX Exporter
 
@@ -208,6 +242,7 @@ variable `JMX_PROMETHEUS=true` on startup of the container.
 This will allow you to get metrics in Prometheus format at `<host>:9404/metrics`. 
 For configuring exporter you need attach your configuration as a container volume 
 at `/camunda/javaagent/prometheus-jmx.yml`.
+This is only supported for `wildfly` and `tomcat` distributions.
 
 ## Build
 
