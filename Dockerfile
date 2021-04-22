@@ -1,6 +1,6 @@
-FROM alpine:3.10 as builder
+FROM alpine:3.12 as builder
 
-ARG VERSION=7.13.0
+ARG VERSION=7.15.0
 ARG DISTRO=tomcat
 ARG SNAPSHOT=false
 
@@ -37,9 +37,9 @@ RUN /tmp/download.sh
 
 ##### FINAL IMAGE #####
 
-FROM alpine:3.10
+FROM alpine:3.12
 
-ARG VERSION=7.13.0
+ARG VERSION=7.15.0
 
 ENV CAMUNDA_VERSION=${VERSION}
 ENV DB_DRIVER=
